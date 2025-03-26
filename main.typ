@@ -6,20 +6,10 @@
 
 #let theory(c) = $uprsans(#c)$
 
-#let Cobham   = $theory("R"_0)$
 #let Robinson = $theory("Q")$
 #let Ind(X)   = $theory("I")#X$
-#let IND(X)   = $#(X)theory("-IND")$
-#let PIND(X)   = $#(X)theory("-PIND")$
-#let Bnd(X)   = $theory("I")#X$
-#let OMEGA    = $theory(Omega)$
-#let IOpen    = $theory("IOpen")$
 #let Peano    = $theory("PA")$
 #let EA    = $theory("EA")$
-
-#let BS(i)    = $theory("S")_2^(#i)$
-#let BT(i)    = $theory("T")_2^(#i)$
-#let BV(i)    = $theory("V")^(#i)$
 
 #let num(x) = $overline(#x)$
 
@@ -41,7 +31,7 @@
 #show: project.with(
   title: [算術的完全性],
   authors: ("Palalansoukî",),
-  repo: "",
+  repo: "https://github.com/iehality/notes-on-arithmetical-completeness",
 )
 
 Solovay による $GL$ の算術的完全性を証明する． 
@@ -193,7 +183,7 @@ $
 
 #proof[
   @lemma:proves-of-models より $EA proves solovay_(r') -> not A^*$.
-  $EA proves A^*$ ならば， $EA proves not solovay_(r')$ が従うが，これは条件4に反する↯.
+  $EA proves A^*$ ならば $EA proves not solovay_(r')$ が従うが，これは条件4に反する↯.
 ]
 
 

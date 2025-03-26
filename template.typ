@@ -63,7 +63,7 @@
         size: 6pt,        
         align(center)[
           #link(repo, [repository])
-          #text(size: 8pt)[$ \* \* \* \*  $]
+          #text(size: 8pt)[$ \* \* \*  $]
           #strong(license)
           #date.at(0)/#date.at(1)/#date.at(2)
         ]
@@ -188,7 +188,6 @@
 #let nproves = $tack.r.not$
 
 #let nmodels = $cancel(models)$
-
 
 #let Nat = $NN$
 #let Rat = $QQ$
