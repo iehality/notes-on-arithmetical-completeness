@@ -6,6 +6,12 @@
 #let lavender = rgb("#9191ff")
 #let lavender2 = rgb("#7b7bff")
 
+#let base-text-size = 10pt
+#let font-base = ("libertinus serif", "Shippori Mincho B1")
+#let font-alter = ("libertinus serif", "Shippori Antique B1")
+#let font-math = ("New Computer Modern Math", "libertinus serif", "Shippori Mincho B1")
+#let font-code = ("JuliaMono", "Noto Sans JP")
+
 #let project(
     title: "",
     authors: (),
@@ -19,11 +25,11 @@
 
   set heading(numbering: "1.1")
 
-  set text(size: 8pt, font: "Shippori Mincho B1")
+  set text(size: base-text-size, font: font-base)
 
-  show math.equation: set text(font: ("New Computer Modern Math", "Shippori Mincho B1"))
+  show math.equation: set text(font: font-math)
 
-  show raw: set text(size: 7pt, font: ("JuliaMono", "Noto Sans JP"))
+  show raw: set text(size: 7pt, font: font-code)
 
   show raw.where(block: false): box.with(
     inset: (x: 0pt, y: 0pt),
@@ -36,7 +42,7 @@
     radius: 1pt,
   )
 
-  show link: set text(weight: "bold", fill: lavender2)
+  show link: set text(font: font-alter, weight: "bold", fill: lavender2)
 
   grid(
     columns: (auto, 1fr, auto),
@@ -55,12 +61,13 @@
     stack(),
     rect(
       width: 65pt,
-      fill: lightlightgray,
+      fill: black,
       stroke: none,
       inset: 15pt,
       text(
         fill: white,
-        size: 6pt,        
+        size: 6pt,
+        font: font-code,   
         align(center)[
           #link(repo, [repository])
           #text(size: 8pt)[$ \* \* \*  $]
@@ -84,7 +91,7 @@
     name,
     title,
     color: lightlightgray,
-    color2: lightgray,
+    color2: black,
     dash: "solid",
     base: "heading") = thmbox(
   name,
@@ -106,7 +113,7 @@
     name,
     title,
     color: lightlightgray,
-    color2: lightgray,
+    color2: black,
     dash: "solid") = thmbox(
   name,
   title,

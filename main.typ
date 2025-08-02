@@ -26,7 +26,9 @@
 #let Box(T) = $box_#T$ 
 #let Dia(T) = $dia_#T$ 
 
-#let solovay = $upright("S")$
+#let ht(x) = $lr(| #x |)$ 
+
+#let solovay = $sans("S")$
 
 #show: project.with(
   title: [算術的完全性],
@@ -35,7 +37,7 @@
 )
 
 Solovay による $GL$ の算術的完全性を証明する． 
-これはしばしば「そこに留まらないと証明出来た場所に移動する点」の移動を記述する原始再帰的関数を構成することで証明されるが，
+これはしばしば「「そこに留まらない」と証明出来た場所に移動する点」の移動を記述する原始再帰的関数を構成することで証明されるが，
 これは形式的には煩雑なので，ここでは明示的に対角化補題を用いて示す．
 証明にあたって @boolos1995logic や @proof-truth の第五章を参考にした．
 
@@ -86,7 +88,23 @@ $$
   #struct[
     仮定より $Proof(T)(w, godel(phi_i))$ かつ $w$ は $psi$-最小. よってすべての $j in u$ について $phi_i witness(T) phi_j$.
   ]
-] 
+]
+
+#let height(x) = $"height"(#x)$
+
+$Box(T)^n phi$ を $Box(T)$ の $n$ 回反復 $underbrace(Box(T) Box(T) ... Box(T), n) phi$ とする．
+理論の高さ $height(T) < omega + 1$ を次のように定める．
+
+#definition[
+  $
+    height(T) :=
+    cases(
+      n & "minimal" n "such that" T proves Box(T)^n bot,
+      omega & "if" T nproves Box(T)^n bot "for all" n)
+  $
+]
+
+$T$ が $Sigma_1$-健全ならば明らかに $height(T) = omega$.
 
 == Kripke モデル
 
@@ -108,6 +126,10 @@ $$
   $
 ]
 
+#definition[
+  $GL$ の有限 Kripke フレーム $F := (W, prec)$ の高さを $ht(F)$ と書く． $(prec)$ が明らかなときは単に $ht(W)$ と書く．
+]
+
 == 鎖
 
 $W$ を集合， $prec$ を $W$ 上の二項関係とする．
@@ -126,25 +148,30 @@ $W$ を集合， $prec$ を $W$ 上の二項関係とする．
 
 = $GL$ の算術的完全性
 
+少し一般化した形で示す．
+
 #theorem[
-  $T$ を $EA$ を含む $Sigma_1$-健全な算術の r.e.理論とする．$GL$ の論理式 $A$ について
+  $T$ を $EA$ を含む算術の r.e.理論とする．$GL$ の論理式 $A$ について
   $
-    GL proves A <==> fal(f.) T proves A^f
+    GL + box^(height(T)) bot proves A <==> fal(f.) T proves A^f
   $
-]
+]<thm:arith-comp>
+
+ただし $box^omega bot := top$ とする．
 
 $(==>)$ 方向は $EA$ が Hilbert-Berneys-Löb 可証性条件を満たすことから従う． $(<==)$ 方向は以下の戦略によって示す．
 
-$GL nproves A ==> exs(f) EA nproves A^f$ を示せば良い． 仮定より $A$ の反例となる有限根付き Kripke モデル $(W', prec', r', V')$ が存在する． 
+$GL nproves A ==> exs(f) EA nproves A^f$ を示せば良い． 仮定より $A$ の反例となる $GL + box^(height(T)) bot$ の Kripke モデル $(W', prec', r', V')$ が存在する． 
 その単純拡大モデル $(W, prec, r, V)$ を得る．
 $W, r' nmodels A $ としてよい．
+また $W', i models box^(height(T)) bot$ より $ht(W) -1 = ht(W') <= height(T)$ である．
 
 これを用いて次を満たす Solovay 文 ${solovay_i}_(i in W)$ を構成する．この構成方法は後節で示す（@lemma:solovay-main-lemma）．
 
-  1. $i != j$ ならば $EA proves solovay_i -> not solovay_j$
-  2. $i prec j$ ならば $EA proves solovay_i -> Dia(T) solovay_j$
-  3. $r prec i$ ならば $EA proves solovay_i -> Box(T) (or.big_(j succ i) solovay_j)$
-  4. $EA nproves not solovay_(r')$
+1. $i != j$ ならば $EA proves solovay_i -> not solovay_j$
+2. $i prec j$ ならば $EA proves solovay_i -> Dia(T) solovay_j$
+3. $r prec i$ ならば $EA proves solovay_i -> Box(T) (or.big_(j succ i) solovay_j)$
+4. $EA proves or.big_(i in W) solovay_i$
 
 変換 $*$ を以下から生成されるものとして定める．
 $
@@ -154,9 +181,9 @@ $
 このとき次が証明可能．
 
 #lemma[
-  すべての論理式 $B$, $i in W$ について，
+  すべての論理式 $B$, $i succ r$ について，
   $
-    M, i models B ==> EA proves solovay_i -> B^*
+    W, i models B ==> EA proves solovay_i -> B^*
   $
 ]<lemma:proves-of-models>
 #proof[
@@ -174,16 +201,25 @@ $
     また条件3と再び可証性条件より $EA proves solovay_i -> Box(T) C^*$.
   / $B = dia C$ のとき:\
     帰納法の仮定より $i prec j$ であるような $j$ で $EA proves solovay_j -> C^*$ を満たすものが存在する．
-    可証性条件より $EA proves Box(T)(solovay_j -> C^*)$.
-    再び可証性条件より $EA proves Box(T)not C^* -> Box(T) not solovay_j$.
+    可証性条件より $EA proves Dia(T) solovay_j -> Dia(T) C^*$.
     したがって条件2より $EA proves solovay_i -> Dia(T) C^*$.
 ]
 
 ここで $(<==)$ 方向を示す．
 
-#proof[
-  @lemma:proves-of-models より $EA proves solovay_(r') -> not A^*$.
-  $EA proves A^*$ ならば $EA proves not solovay_(r')$ が従うが，これは条件4に反する↯.
+#proof[(@thm:arith-comp)][
+  まず $EA proves Dia(T)^(ht(W)) top -> solovay_r$ が成り立つ．
+  #struct[
+    $i succ r$ について， $W, i models box^ht(W) bot$ であるから @lemma:proves-of-models より $EA proves solovay_i -> Box(T)^ht(W) bot$.
+    よって $EA proves Dia(T)^ht(W) top -> and.big_(i succ r) not solovay_i$.
+    従って条件 4. より $EA proves Dia(T)^ht(W) top -> solovay_r$.
+  ]
+  また条件2より $EA + Dia(T)^(ht(W)) top proves Dia(T) solovay_(r')$.
+  @lemma:proves-of-models より $EA proves solovay_(r') -> not A^*$ だから $EA + Dia(T)^(ht(W)) top proves Dia(T) not A^*$,
+  よって $EA + Dia(T)^(ht(W)) top proves not Box(T) A^*$.
+  したがって $T proves A^*$ ならば $EA proves Box(T)^(ht(W)) bot$,
+  $EA$ の $Sigma_1$-健全性より $T proves Box(T)^(ht(W) - 1) bot$ だが， これは $ht(W) - 1 <= height(T)$ と矛盾する↯．
+
 ]
 
 
@@ -191,97 +227,91 @@ $
 
 $(W, prec, r)$ を 根付き-有限-非反射-推移的 Kripke フレームとする．
 
+#let FunH = $sans("H")$
+
 #definition[
-  $W$ の有限 $prec$-鎖 $epsilon$ について， ${x_i}_(i in W)$ のみを自由変数として持つ論理式 $Theta_(epsilon)$ を定める．
+  $W$ の有限 $prec$-鎖 $epsilon$ について， ${x_i}_(i in W)$ のみを自由変数として持つ論理式 $FunH_(epsilon)$ を定める．
   $
-    Theta_brak(i) &:= top\
-    Theta_(epsilon paren.t brak(i, j)) &:= 
-      Theta_(epsilon paren.t brak(i)) and and.big_(k succ i) godel(not out(x_j)) witness(T) godel(not out(x_k))\
+    FunH_brak(i) &:= top\
+    FunH_(epsilon paren.t brak(i, j)) &:= 
+      FunH_(epsilon paren.t brak(i)) and and.big_(k succ i) godel(not out(x_j)) witness(T) godel(not out(x_k))\
   $
-  また $i in W$ について $Theta_(i)$ を次のように定義する．
+  また $i in W$ について $FunH_(i)$ を次のように定義する．
   $
-    Theta_(i) := or.big_(epsilon in "Chain"(r, i)) Theta_epsilon
+    FunH_(i) := or.big_(epsilon in "Chain"(r, i)) FunH_epsilon
   $
 ]
 $Phi({t_j \/ x_j}_(j in u))$ は式 $Phi$ に現れる $u$ で添え字づけられた各自由変数 $x_j$ に $t_j$ を代入した結果を表す表記とする．
 #definition[Solovay 文][
   対角化補題により次のような文のあつまり ${solovay_i}_(i in W)$ が定義できる．
   $
-    EA proves solovay_i <-> Theta_(i)({godel(solovay_j) \/ x_j}_(j in W) ) and and.big_(k succ i) Dia(T)solovay_k
+    EA proves solovay_i <-> FunH_(i)({godel(solovay_j) \/ x_j}_(j in W) ) and and.big_(k succ i) Dia(T)solovay_k
     " for all" i in W
   $
 ]<def:construct-solovay>
 
-以降 $Theta_(epsilon)({godel(solovay_j) \/ x_j}_(j in W))$ や $Theta_(i)({godel(solovay_j) \/ x_j}_(j in W))$
-を単に $Theta_epsilon$, $Theta_(i)$ と略記する
+以降 $FunH_(epsilon)({godel(solovay_j) \/ x_j}_(j in W))$ や $FunH_(i)({godel(solovay_j) \/ x_j}_(j in W))$
+を単に $FunH_epsilon$, $FunH_(i)$ と略記する
 #footnote[
-    $Theta_i$ は， @boolos1995logic や @proof-truth の証明における関数 $h$ について
+    $FunH_i$ は， @boolos1995logic や @proof-truth の証明における関数 $h$ について
     $h$ の値域が $i$ を通過することを意味する論理式 $exs(n) h(n) = i$ に対応する論理式である．
 ]． これらが共に $Sigma_1$-論理式であることに注意せよ．
 
 #lemma[
   1. 比較不能な $epsilon_1 in "Chain"(r, i_1), epsilon_2 in "Chain"(r, i_2)$ について，
-    $EA proves Theta_(epsilon_1) -> not Theta_(epsilon_2)$
+    $EA proves FunH_(epsilon_1) -> not FunH_(epsilon_2)$
   2. $i succ 0$ について $EA proves solovay_i -> Box(T) not solovay_i$
-  3. $i in W$ について $EA proves Theta_i -> solovay_i or or.big_(j succ i) solovay_j$.
-  4. $T$ が $Sigma_1$-健全ならば $Nat models solovay_(r)$.
-]<lemma:theta>
+  3. $i in W$ について $EA proves FunH_i -> solovay_i or or.big_(j succ i) solovay_j$.
+]<lemma:FunH>
 #proof[
   1. 比較不能性よりある $epsilon in "Chain"(r, i)$ と
     $epsilon paren.t brak(j_1) subset.eq epsilon_1$, $epsilon paren.t brak(j_2) subset.eq epsilon_2$
     であるような相異なる $j_1, j_2 in W$ が存在する．
-    $EA$ の内部で作業する． $Theta_(epsilon_1), Theta_(epsilon_2)$ を仮定すると， その定義より
-    $Theta_brak(i, j_1)$, $Theta_brak(i, j_2)$ が従う．
+    $EA$ の内部で作業する． $FunH_(epsilon_1), FunH_(epsilon_2)$ を仮定すると， その定義より
+    $FunH_brak(i, j_1)$, $FunH_brak(i, j_2)$ が従う．
     よって $not solovay_(j_1) witness(T) not solovay_(j_2)$ かつ $not solovay_(j_2) witness(T) not solovay_(j_1)$
     なので反対称性より $j_1 = j_2$ ↯.
   2. ある $i' prec i$, $epsilon'$ について $epsilon = epsilon' paren.t brak(i', i)$.
-    $EA proves Theta_epsilon -> Theta_brak(i', i)$ より $EA proves Theta_epsilon -> Box(T) not solovay_i$.
+    $EA proves FunH_epsilon -> FunH_brak(i', i)$ より $EA proves FunH_epsilon -> Box(T) not solovay_i$.
   3. $i$ の高さに関する帰納法で示す．
-    すべての $j succ i$ について $EA proves Theta_j -> solovay_j or or.big_(k succ j) solovay_k$ であると仮定する．
-    $EA$ の内部で作業する． $Theta_i$ と $not solovay_i$ を仮定し $or.big_(j succ i) solovay_j$ が従うことを示せばよい．
+    すべての $j succ i$ について $EA proves FunH_j -> solovay_j or or.big_(k succ j) solovay_k$ であると仮定する．
+    $EA$ の内部で作業する． $FunH_i$ と $not solovay_i$ を仮定し $or.big_(j succ i) solovay_j$ が従うことを示せばよい．
     #struct[
       $not solovay_i$ より $or.big_(j succ i) Box(T) not solovay_j$ であるから， @lemma:search-minimal-proof より
       ある $j succ i$ について $and.big_(j' succ i) not solovay_j witness(T) not solovay_(j')$, 
-      すなわち $Theta_brak(i, j)$ が成り立つ．
-      よって $Theta_j$ なので帰納法の仮定より $solovay_j or or.big_(k succ j) solovay_k$.
+      すなわち $FunH_brak(i, j)$ が成り立つ．
+      よって $FunH_j$ なので帰納法の仮定より $solovay_j or or.big_(k succ j) solovay_k$.
     ]
-  4. まず次を示す： $r prec i$ ならば $Nat nmodels solovay_i$.
-    #struct[
-      $Nat models solovay_i$ ならば 2. より $Nat models Box(T) not solovay_i <==> T proves not solovay_i$ を得る．
-      $not solovay_i$ は $Pi_2$-論理式なので $T$ の $Sigma_1$-完全性より $Nat models not solovay_i$ ↯.
-    ]
-    また $EA proves or.big_(i in W) solovay_i$
-    #struct[
-      3. より $EA proves Theta_0 -> or.big_(i in W) solovay_i$ より．
-    ]
-    より $Nat models or.big_(i in W) solovay_i$. よって $Nat models solovay_(r)$.
 ]
 
 #lemma[
   1. $i != j$ ならば $EA proves solovay_i -> not solovay_j$.
   2. $i prec j$ ならば $EA proves solovay_i -> Dia(T) solovay_j$.
   3. $r prec i$ ならば $EA proves solovay_i -> Box(T) (or.big_(j succ i) solovay_j)$.
-  4. $T$ が $Sigma_1$-健全ならば $EA nproves not solovay_i$.
+  4. $EA proves or.big_(i in W) solovay_i$.
 ]<lemma:solovay-main-lemma>
 #proof[
   1. すべての
     $epsilon_i in "Chain"(r, i), epsilon_j in "Chain"(r, j)$ について次を示せば良い．
     $
       EA proves
-        not (Theta_(epsilon_i) and Theta_(epsilon_j) and
+        not (FunH_(epsilon_i) and FunH_(epsilon_j) and
           and.big_(k succ i) Dia(T) solovay_k and and.big_(l succ j) Dia(T) solovay_l)
     $
-    $epsilon_i, epsilon_j$ が比較不能なときは @lemma:theta より従う．
+    $epsilon_i, epsilon_j$ が比較不能なときは @lemma:FunH より従う．
     比較可能だと仮定する． ある $k in W$ について $epsilon_i paren.t brak(k) subset.eq epsilon_j$ と仮定する．
     $EA$ の内部で作業する．
     $i prec k$ より $Dia(T) solovay_k$.
-    また $Theta_(epsilon_j)$ より $Theta_brak(i, k)$, 従って $Box(T) not solovay_k$ ↯.
+    また $FunH_(epsilon_j)$ より $FunH_brak(i, k)$, 従って $Box(T) not solovay_k$ ↯.
   2. $solovay_i$ の定義から従う．
-  3. @lemma:theta の 3. と可証性条件より $EA proves Box(T)(Theta_i -> solovay_i or or.big_(j succ i) solovay_j)$.
+  3. @lemma:FunH の 3. と可証性条件より $EA proves Box(T)(FunH_i -> solovay_i or or.big_(j succ i) solovay_j)$.
     また $Sigma_1$-完全性より
-    #footnote[唯一 $Sigma_1$-完全性を使用している箇所． ]  $EA proves Theta_i -> Box(T) Theta_i$.
-    従って再び可証性条件より $EA proves Theta_i -> Box(T)(solovay_i or or.big_(j succ i) solovay_j)$.
-    @lemma:theta の 2. より $EA proves Theta_i -> Box(T)(or.big_(j succ i) solovay_j)$.
+    #footnote[唯一 $exists Pi^"b"_1$-完全性を使用している箇所．
+      exponential の全域性が示せない理論で $exists Pi^"b"_1$-完全性が成立するかは未解決 @BeklemishevVisser2006, @BerarducciVerbrugge1993．
+      なのでここではベース理論を $EA$ とした．]
+    $EA proves FunH_i -> Box(T) FunH_i$.
+    従って再び可証性条件より $EA proves FunH_i -> Box(T)(solovay_i or or.big_(j succ i) solovay_j)$.
+    @lemma:FunH の 2. より $EA proves FunH_i -> Box(T)(or.big_(j succ i) solovay_j)$.
     よって $EA proves solovay_i -> Box(T)(or.big_(j succ i) solovay_j).$
-  4. 2. より $Nat models solovay_(r) -> Dia(T) solovay_i$. @lemma:theta の 4. より  $Nat models Dia(T) solovay_i <==> T nproves not solovay_i$ を得る.
+  4. @lemma:FunH の 3. より従う．
 ]
